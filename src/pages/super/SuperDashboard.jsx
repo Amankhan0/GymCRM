@@ -24,9 +24,9 @@ import {
   TableHead,
   TableCell,
 } from '@/components/ui/table';
-import { Loading } from '@/components/common/Loading';
-import { EmptyState } from '@/components/common/EmptyState';
-import { StatCard } from '@/components/dashboard/StatCard';
+import { Loading } from '@/shared/components/Loading';
+import { EmptyState } from '@/shared/components/EmptyState';
+import { StatCard } from '@/gym/components/dashboard/StatCard';
 import { superadminService } from '@/services/superadminService';
 import { formatCurrency, formatDate } from '@/lib/utils';
 

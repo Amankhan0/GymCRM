@@ -3,8 +3,8 @@ import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import { Provider } from 'react-redux';
 
-import GymApp from './App';
-import { store as gymStore } from './store';
+import GymApp from './gym/App';
+import { store as gymStore } from './gym/store';
 import B2BApp from './b2b/App';
 import { store as b2bStore } from './b2b/store';
 
