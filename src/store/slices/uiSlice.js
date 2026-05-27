@@ -10,6 +10,7 @@ const uiSlice = createSlice({
   initialState: {
     sidebarOpen: false,
     theme: loadTheme(),
+    subscriptionDialogOpen: false,
   },
   reducers: {
     toggleSidebar(state) {
@@ -26,8 +27,17 @@ const uiSlice = createSlice({
       state.theme = state.theme === 'light' ? 'dark' : 'light';
       localStorage.setItem('gym_theme', state.theme);
     },
+    setSubscriptionDialogOpen(state, action) {
+      state.subscriptionDialogOpen = !!action.payload;
+    },
   },
 });
 
-export const { toggleSidebar, setSidebarOpen, setTheme, toggleTheme } = uiSlice.actions;
+export const {
+  toggleSidebar,
+  setSidebarOpen,
+  setTheme,
+  toggleTheme,
+  setSubscriptionDialogOpen,
+} = uiSlice.actions;
 export default uiSlice.reducer;

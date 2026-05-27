@@ -3,7 +3,6 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
 import { Moon, Sun, CreditCard, ArrowRight } from 'lucide-react';
-import { Link } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { formatDate } from '@/lib/utils';
 
@@ -11,7 +10,7 @@ import { profileSchema, passwordSchema } from '@/utils/validators';
 import { profileService } from '@/services/profileService';
 import { useAuth } from '@/hooks/useAuth';
 import { updateUser } from '@/store/slices/authSlice';
-import { setTheme } from '@/store/slices/uiSlice';
+import { setTheme, setSubscriptionDialogOpen } from '@/store/slices/uiSlice';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { Button } from '@/components/ui/button';
@@ -188,6 +187,7 @@ function AppearanceCard() {
 
 function SubscriptionCard() {
   const { user } = useAuth();
+  const dispatch = useDispatch();
   const state = user?.subscriptionState || 'expired';
   const meta = {
     trial:   { label: 'Free trial', variant: 'warning', desc: `Free trial ends ${user?.trialEndsAt ? formatDate(user.trialEndsAt) : ''}` },
@@ -204,10 +204,8 @@ function SubscriptionCard() {
       <CardContent className="flex flex-wrap items-center gap-4">
         <Badge variant={meta.variant} className="text-sm">{meta.label}</Badge>
         <span className="text-sm text-muted-foreground flex-1 min-w-0">{meta.desc}</span>
-        <Button asChild>
-          <Link to="/subscribe">
-            Manage subscription <ArrowRight className="h-4 w-4 ml-1" />
-          </Link>
+        <Button onClick={() => dispatch(setSubscriptionDialogOpen(true))}>
+          Manage subscription <ArrowRight className="h-4 w-4 ml-1" />
         </Button>
       </CardContent>
     </Card>

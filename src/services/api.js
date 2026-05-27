@@ -1,5 +1,7 @@
 import axios from 'axios';
 import { toast } from 'sonner';
+import { store } from '@/store';
+import { setSubscriptionDialogOpen } from '@/store/slices/uiSlice';
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5001/api',
@@ -26,11 +28,7 @@ api.interceptors.response.use(
         window.location.href = '/login';
       }
     } else if (status === 402) {
-      // Subscription required — bounce to the subscribe page unless we're already there or in profile.
-      const path = window.location.pathname;
-      if (!path.startsWith('/subscribe') && !path.startsWith('/profile')) {
-        window.location.href = '/subscribe';
-      }
+      store.dispatch(setSubscriptionDialogOpen(true));
     } else if (status >= 500) {
       toast.error(message);
     }
