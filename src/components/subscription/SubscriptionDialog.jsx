@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'sonner';
-import { ScanLine, CheckCircle2, Clock, XCircle, AlertCircle } from 'lucide-react';
+import { ScanLine, CheckCircle2, Clock, XCircle, AlertCircle, LogOut, X } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -28,7 +29,8 @@ const requestVariant = { pending: 'warning', approved: 'success', rejected: 'des
 export function SubscriptionDialog() {
   const open = useSelector((s) => s.ui.subscriptionDialogOpen);
   const dispatch = useDispatch();
-  const { user } = useAuth();
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
 
   const [plans, setPlans] = useState([]);
   const [status, setStatus] = useState(null);
@@ -37,6 +39,22 @@ export function SubscriptionDialog() {
   const [submitting, setSubmitting] = useState(false);
 
   const close = () => dispatch(setSubscriptionDialogOpen(false));
+
+  const isExpired = status?.state === 'expired';
+
+  // When the user is expired the dialog must not be dismissable — closing would strand them on a
+  // page that already failed its API calls (the 402 broke them out of useEffect with no data).
+  // The only escape is "Subscribe" or "Logout".
+  const handleOpenChange = (next) => {
+    if (!next && isExpired) return;
+    dispatch(setSubscriptionDialogOpen(next));
+  };
+
+  const handleLogout = () => {
+    logout();
+    dispatch(setSubscriptionDialogOpen(false));
+    navigate('/login', { replace: true });
+  };
 
   const load = async () => {
     const [pRes, sRes] = await Promise.all([
@@ -100,13 +118,34 @@ export function SubscriptionDialog() {
     lastRejected && status?.requests?.[0]?._id === lastRejected._id; // only if it's the latest
 
   return (
-    <Dialog open={open} onOpenChange={(v) => dispatch(setSubscriptionDialogOpen(v))}>
-      <DialogContent className="max-w-md">
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogContent
+        className="max-w-md"
+        hideClose
+        // Block outside-click and Esc from dismissing when expired (matches handleOpenChange)
+        onInteractOutside={(e) => { if (isExpired) e.preventDefault(); }}
+        onEscapeKeyDown={(e) => { if (isExpired) e.preventDefault(); }}
+      >
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <ScanLine className="h-5 w-5" /> Subscription
-          </DialogTitle>
-          <DialogDescription>Scan the QR, pay, then submit the UTR.</DialogDescription>
+          <div className="flex items-start justify-between gap-2">
+            <div>
+              <DialogTitle className="flex items-center gap-2">
+                <ScanLine className="h-5 w-5" /> Subscription
+              </DialogTitle>
+              <DialogDescription>Scan the QR, pay, then submit the UTR.</DialogDescription>
+            </div>
+            {/* Active/trial users can close at will; expired users cannot (must subscribe or logout) */}
+            {!isExpired && (
+              <button
+                type="button"
+                onClick={close}
+                aria-label="Close"
+                className="rounded-sm opacity-70 hover:opacity-100 focus:outline-none"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
+          </div>
         </DialogHeader>
 
         {!status ? (
@@ -211,6 +250,15 @@ export function SubscriptionDialog() {
                     </div>
                   ))}
                 </div>
+              </div>
+            )}
+
+            {/* Expired users need an escape hatch — they can't dismiss the dialog any other way */}
+            {isExpired && (
+              <div className="border-t pt-3 flex justify-center">
+                <Button variant="ghost" size="sm" onClick={handleLogout} className="text-muted-foreground">
+                  <LogOut className="h-4 w-4 mr-1" /> Logout
+                </Button>
               </div>
             )}
           </div>
