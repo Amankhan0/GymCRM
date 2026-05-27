@@ -25,6 +25,26 @@ export const partySchema = z.object({
   notes: z.string().optional().or(z.literal('')),
 });
 
+// Mirrors the Lead model enums on the server — keep these two in sync.
+export const LEAD_STATUS = ['new', 'contacted', 'interested', 'converted', 'lost'];
+export const LEAD_SOURCE = ['website', 'referral', 'cold-call', 'social-media', 'trade-show', 'advertisement', 'other'];
+
+export const leadSchema = z.object({
+  name: z.string().min(2, 'Name is required'),
+  contactCompany: z.string().optional().or(z.literal('')),
+  email: z.string().email('Invalid email').optional().or(z.literal('')),
+  phone: z.string().regex(PHONE, 'Enter a valid 10-digit mobile').optional().or(z.literal('')),
+  source: z.enum(LEAD_SOURCE).default('other'),
+  status: z.enum(LEAD_STATUS).default('new'),
+  estimatedValue: z
+    .union([z.string().length(0), z.coerce.number().min(0)])
+    .optional(),
+  description: z.string().optional().or(z.literal('')),
+  notes: z.string().optional().or(z.literal('')),
+  followUpDate: z.string().optional().or(z.literal('')),
+  lostReason: z.string().optional().or(z.literal('')),
+});
+
 export const productSchema = z.object({
   name: z.string().min(2, 'Product name is required'),
   description: z.string().optional().or(z.literal('')),

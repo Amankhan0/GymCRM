@@ -27,12 +27,23 @@ export function DataPage({
   searchPlaceholder = 'Search...',
   emptyMessage = 'No records yet — add your first one.',
   formTitle = title,
+  // Optional: tabs that filter the list by some query param.
+  // [{ key: 'all', label: 'All' }, { key: 'new', label: 'New', countKey: 'new' }, ...]
+  // When set, also pass `filterField` (e.g. 'status') and the value goes into the API query.
+  filterTabs,
+  filterField,
+  // Optional: render extra actions on each row (right of edit/delete). (item) => ReactNode
+  extraActions,
+  // Optional callback: fires after every list() with the latest meta. Lets the parent read
+  // server-supplied numbers like per-status counts for tab badges.
+  onMeta,
 }) {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const [meta, setMeta] = useState({ pages: 1, total: 0 });
+  const [activeTab, setActiveTab] = useState(filterTabs?.[0]?.key || null);
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState(null);
@@ -41,9 +52,14 @@ export function DataPage({
   const load = async () => {
     setLoading(true);
     try {
-      const res = await service.list({ search, page, limit: 20 });
+      const params = { search, page, limit: 20 };
+      if (filterTabs && activeTab && activeTab !== 'all' && filterField) {
+        params[filterField] = activeTab;
+      }
+      const res = await service.list(params);
       setItems(res.data || []);
       setMeta(res.meta || { pages: 1, total: 0 });
+      if (onMeta) onMeta(res.meta || {});
     } finally {
       setLoading(false);
     }
@@ -54,7 +70,7 @@ export function DataPage({
     const t = setTimeout(() => load(), search ? 300 : 0);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search, page]);
+  }, [search, page, activeTab]);
 
   const openCreate = () => { setEditing(null); setDialogOpen(true); };
   const openEdit = (item) => { setEditing(item); setDialogOpen(true); };
@@ -112,6 +128,30 @@ export function DataPage({
         </Button>
       </div>
 
+      {/* Filter tabs (optional) */}
+      {filterTabs && filterTabs.length > 0 && (
+        <div className="flex gap-1 border-b overflow-x-auto">
+          {filterTabs.map((t) => (
+            <button
+              key={t.key}
+              onClick={() => { setActiveTab(t.key); setPage(1); }}
+              className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors whitespace-nowrap ${
+                activeTab === t.key
+                  ? 'border-primary text-foreground'
+                  : 'border-transparent text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              {t.label}
+              {t.count != null && (
+                <span className="ml-2 inline-flex items-center justify-center text-[10px] bg-muted text-muted-foreground rounded-full px-1.5 min-w-[18px] h-[18px]">
+                  {t.count}
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
+      )}
+
       {/* Search */}
       <Card>
         <CardContent className="p-4 space-y-4">
@@ -151,6 +191,7 @@ export function DataPage({
                         ))}
                         <TableCell className="text-right">
                           <div className="flex gap-1 justify-end">
+                            {extraActions && extraActions(item, { reload: load })}
                             <Button size="sm" variant="ghost" onClick={() => openEdit(item)}>
                               <Edit2 className="h-4 w-4" />
                             </Button>

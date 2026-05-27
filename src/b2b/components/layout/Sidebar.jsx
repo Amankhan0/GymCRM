@@ -13,7 +13,7 @@ import { cn } from '@/lib/utils';
 // the bottom since those are touched less often once seeded. Reports last.
 const NAV = [
   { to: '/dashboard',         label: 'Dashboard',          icon: LayoutDashboard },
-  { to: '/leads',             label: 'Leads',              icon: UserPlus,          disabled: true },
+  { to: '/leads',             label: 'Leads',              icon: UserPlus },
   { to: '/quotations',        label: 'Quotations',         icon: FileText,          disabled: true },
   { to: '/orders',            label: 'Orders',             icon: ShoppingCart,      disabled: true },
   { to: '/proforma-invoices', label: 'Proforma Invoices',  icon: FileSpreadsheet,   disabled: true },
