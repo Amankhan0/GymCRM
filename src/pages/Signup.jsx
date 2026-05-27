@@ -24,7 +24,7 @@ export default function Signup() {
     formState: { errors },
   } = useForm({
     resolver: zodResolver(signupSchema),
-    defaultValues: { name: '', email: '', password: '', phone: '' },
+    defaultValues: { name: '', gymName: '', email: '', password: '', phone: '' },
   });
 
   const onSubmit = async (values) => {
@@ -42,20 +42,25 @@ export default function Signup() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-muted/40 p-4">
-      <Card className="w-full max-w-md">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950 p-4">
+      <Card className="w-full max-w-md shadow-xl">
         <CardContent className="p-8">
           <div className="flex flex-col items-center mb-6">
-            <div className="h-12 w-12 rounded-xl bg-primary flex items-center justify-center mb-3">
-              <Dumbbell className="h-6 w-6 text-primary-foreground" />
+            <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center mb-3 shadow-lg shadow-indigo-500/30">
+              <Dumbbell className="h-6 w-6 text-white" />
             </div>
-            <h1 className="text-2xl font-bold">Create account</h1>
-            <p className="text-sm text-muted-foreground mt-1">Start managing your gym today</p>
+            <h1 className="text-2xl font-bold">Create your gym</h1>
+            <p className="text-sm text-muted-foreground mt-1">Each signup creates a private workspace for one gym</p>
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div>
-              <Label>Full name</Label>
+              <Label>Gym name</Label>
+              <Input placeholder="e.g. Iron Paradise" {...register('gymName')} />
+              {errors.gymName && <p className="text-xs text-destructive mt-1">{errors.gymName.message}</p>}
+            </div>
+            <div>
+              <Label>Your name</Label>
               <Input {...register('name')} />
               {errors.name && <p className="text-xs text-destructive mt-1">{errors.name.message}</p>}
             </div>
@@ -73,7 +78,7 @@ export default function Signup() {
               <Input type="password" {...register('password')} />
               {errors.password && <p className="text-xs text-destructive mt-1">{errors.password.message}</p>}
             </div>
-            <Button type="submit" disabled={loading} className="w-full">
+            <Button type="submit" disabled={loading} className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700">
               {loading ? 'Creating...' : 'Create account'}
             </Button>
           </form>

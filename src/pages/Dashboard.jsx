@@ -1,16 +1,19 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Users, UserCog, ClipboardCheck, AlertCircle, DollarSign, UserPlus } from 'lucide-react';
+
 import { StatCard } from '@/components/dashboard/StatCard';
 import { RevenueChart, AttendanceChart } from '@/components/dashboard/DashboardCharts';
 import { RecentPayments } from '@/components/dashboard/RecentPayments';
 import { dashboardService } from '@/services/dashboardService';
 import { formatCurrency } from '@/lib/utils';
 import { Loading } from '@/components/common/Loading';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function Dashboard() {
   const [stats, setStats] = useState(null);
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   useEffect(() => {
     dashboardService.stats().then((res) => setStats(res.data));
@@ -21,43 +24,53 @@ export default function Dashboard() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
-        <p className="text-sm text-muted-foreground">An overview of your gym at a glance.</p>
+        <h1 className="text-2xl font-bold tracking-tight">
+          Welcome back{user?.name ? `, ${user.name.split(' ')[0]}` : ''} 👋
+        </h1>
+        <p className="text-sm text-muted-foreground">
+          Here's what's happening at {user?.gymName || 'your gym'} today.
+        </p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-        <StatCard title="Total Members" value={stats.totalMembers} icon={Users} />
+        <StatCard title="Total Members" value={stats.totalMembers} icon={Users} tone="indigo" />
 
-        {/* Click jumps to /members?pendingFees=true so the user can immediately see who to chase */}
+        {/* Pending fees in red so it visually pops as the most urgent metric */}
         <button onClick={() => navigate('/members?pendingFees=true')} className="text-left">
           <StatCard
             title="Pending Fees"
             value={stats.pendingFees}
-            subtitle="Click to view list"
+            subtitle="Click to view"
             icon={AlertCircle}
-            iconClass="bg-red-100 text-red-700"
+            tone="red"
+            accent="text-red-600 dark:text-red-400"
           />
         </button>
 
         <StatCard
-          title="New Members"
+          title="New This Month"
           value={stats.newMembersThisMonth}
-          subtitle="This month"
+          subtitle="Members joined"
           icon={UserPlus}
-          iconClass="bg-green-100 text-green-700"
+          tone="green"
         />
-        <StatCard title="Trainers" value={stats.totalTrainers} icon={UserCog} />
+
+        <StatCard title="Trainers" value={stats.totalTrainers} icon={UserCog} tone="purple" />
+
+        {/* "Attended today / total active" so the owner sees the ratio at a glance */}
         <StatCard
           title="Today's Attendance"
-          value={stats.todaysAttendance}
+          value={`${stats.todaysAttendance} / ${stats.activeMembers}`}
+          subtitle="Present today / active"
           icon={ClipboardCheck}
-          iconClass="bg-blue-100 text-blue-700"
+          tone="blue"
         />
+
         <StatCard
           title="Revenue (Month)"
           value={formatCurrency(stats.monthlyRevenue)}
           icon={DollarSign}
-          iconClass="bg-purple-100 text-purple-700"
+          tone="amber"
         />
       </div>
 

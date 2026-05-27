@@ -28,7 +28,12 @@ function ProfileCard() {
     formState: { errors },
   } = useForm({
     resolver: zodResolver(profileSchema),
-    defaultValues: { name: user?.name || '', email: user?.email || '', phone: user?.phone || '' },
+    defaultValues: {
+      name: user?.name || '',
+      email: user?.email || '',
+      phone: user?.phone || '',
+      gymName: user?.gymName || '',
+    },
   });
 
   const onSubmit = async (values) => {
@@ -53,7 +58,12 @@ function ProfileCard() {
       <CardContent>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 max-w-lg">
           <div>
-            <Label>Name</Label>
+            <Label>Gym name</Label>
+            <Input {...register('gymName')} />
+            {errors.gymName && <p className="text-xs text-destructive mt-1">{errors.gymName.message}</p>}
+          </div>
+          <div>
+            <Label>Your name</Label>
             <Input {...register('name')} />
             {errors.name && <p className="text-xs text-destructive mt-1">{errors.name.message}</p>}
           </div>
