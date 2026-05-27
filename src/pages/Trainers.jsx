@@ -63,7 +63,11 @@ export default function Trainers() {
       setDialogOpen(false);
       load(search);
     } catch (err) {
-      toast.error(err?.response?.data?.message || 'Save failed');
+      // 409 (duplicate) is handled inline by the form. Toast only for everything else.
+      if (err?.response?.status !== 409) {
+        toast.error(err?.response?.data?.message || 'Save failed');
+      }
+      throw err;
     } finally {
       setSubmitting(false);
     }

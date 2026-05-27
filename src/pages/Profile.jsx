@@ -76,7 +76,14 @@ function ProfileCard() {
           </div>
           <div>
             <Label>Phone</Label>
-            <Input {...register('phone')} />
+            <Input
+              type="tel"
+              inputMode="numeric"
+              maxLength={10}
+              placeholder="10-digit mobile"
+              {...register('phone')}
+            />
+            {errors.phone && <p className="text-xs text-destructive mt-1">{errors.phone.message}</p>}
           </div>
           <Button type="submit" disabled={saving}>
             {saving ? 'Saving...' : 'Save changes'}

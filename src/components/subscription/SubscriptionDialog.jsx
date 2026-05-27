@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'sonner';
-import { ScanLine, CheckCircle2, Clock, XCircle } from 'lucide-react';
+import { ScanLine, CheckCircle2, Clock, XCircle, AlertCircle } from 'lucide-react';
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -14,6 +14,7 @@ import { subscriptionService } from '@/services/subscriptionService';
 import { setSubscriptionDialogOpen } from '@/store/slices/uiSlice';
 import { updateUser } from '@/store/slices/authSlice';
 import { useAuth } from '@/hooks/useAuth';
+import { utrRule } from '@/utils/validators';
 import { formatCurrency, formatDate, cn } from '@/lib/utils';
 
 const stateMeta = {
@@ -63,14 +64,20 @@ export function SubscriptionDialog() {
   const onSubmit = async (e) => {
     e.preventDefault();
     if (!selected) return toast.error('Pick a plan first');
-    if (!utr.trim()) return toast.error('Enter the UTR / transaction reference');
+
+    // Client-side UTR format check mirrors the backend schema.
+    const trimmed = utr.trim();
+    const parsed = utrRule.safeParse(trimmed);
+    if (!parsed.success) {
+      return toast.error(parsed.error.errors[0]?.message || 'Invalid UTR');
+    }
 
     setSubmitting(true);
     try {
       // paidAt auto-set to "now" — user doesn't enter date/time, backend just needs the field
       await subscriptionService.submit({
         planKey: selected.key,
-        utr: utr.trim(),
+        utr: trimmed,
         paidAt: new Date().toISOString(),
       });
       toast.success('Request submitted — admin will verify shortly.');
@@ -86,6 +93,12 @@ export function SubscriptionDialog() {
   const StateIcon = stateMeta[status?.state]?.icon || Clock;
   const stateInfo = stateMeta[status?.state];
 
+  // Surface the *most recent* rejection to the user (banner at top) so they know why their
+  // previous attempt failed and can fix it on the next try.
+  const lastRejected = status?.requests?.find((r) => r.status === 'rejected');
+  const showRejectBanner =
+    lastRejected && status?.requests?.[0]?._id === lastRejected._id; // only if it's the latest
+
   return (
     <Dialog open={open} onOpenChange={(v) => dispatch(setSubscriptionDialogOpen(v))}>
       <DialogContent className="max-w-md">
@@ -100,6 +113,19 @@ export function SubscriptionDialog() {
           <Loading />
         ) : (
           <div className="space-y-4">
+            {/* Last-rejection banner — only shown when the most recent request is rejected */}
+            {showRejectBanner && (
+              <div className="flex gap-2 rounded-lg border border-red-200 bg-red-50 dark:bg-red-950/30 dark:border-red-900/50 p-3">
+                <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
+                <div className="text-xs">
+                  <p className="font-medium text-red-700 dark:text-red-300">Last payment was rejected</p>
+                  <p className="text-red-600 dark:text-red-400 mt-0.5">
+                    {lastRejected.rejectionReason || 'No reason provided. Please re-check the payment and try again.'}
+                  </p>
+                </div>
+              </div>
+            )}
+
             {/* Status pill */}
             <div className="flex items-center gap-2 rounded-lg bg-muted/50 px-3 py-2">
               <StateIcon className={cn(
@@ -165,16 +191,23 @@ export function SubscriptionDialog() {
             {status.requests?.length > 0 && (
               <div className="border-t pt-3">
                 <p className="text-xs font-medium mb-2 text-muted-foreground">Recent requests</p>
-                <div className="space-y-1.5 max-h-32 overflow-y-auto">
+                <div className="space-y-2 max-h-40 overflow-y-auto">
                   {status.requests.slice(0, 5).map((r) => (
-                    <div key={r._id} className="flex items-center gap-2 text-xs">
-                      <Badge variant={requestVariant[r.status] || 'secondary'} className="capitalize text-[10px] px-1.5 py-0">
-                        {r.status}
-                      </Badge>
-                      <span className="capitalize">{r.planKey}</span>
-                      <span className="text-muted-foreground">·</span>
-                      <span className="font-mono truncate flex-1">{r.utr}</span>
-                      <span className="text-muted-foreground">{formatCurrency(r.amount)}</span>
+                    <div key={r._id} className="text-xs">
+                      <div className="flex items-center gap-2">
+                        <Badge variant={requestVariant[r.status] || 'secondary'} className="capitalize text-[10px] px-1.5 py-0">
+                          {r.status}
+                        </Badge>
+                        <span className="capitalize">{r.planKey}</span>
+                        <span className="text-muted-foreground">·</span>
+                        <span className="font-mono truncate flex-1">{r.utr}</span>
+                        <span className="text-muted-foreground">{formatCurrency(r.amount)}</span>
+                      </div>
+                      {r.status === 'rejected' && r.rejectionReason && (
+                        <p className="mt-0.5 ml-1 text-[11px] text-red-600 dark:text-red-400">
+                          Rejected: {r.rejectionReason}
+                        </p>
+                      )}
                     </div>
                   ))}
                 </div>

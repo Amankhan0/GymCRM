@@ -1,5 +1,20 @@
 import { z } from 'zod';
 
+// Indian mobile: exactly 10 digits, first digit 6-9. Same regex used on the backend.
+const PHONE_REGEX = /^[6-9]\d{9}$/;
+const PHONE_MSG = 'Enter a valid 10-digit mobile number';
+
+export const phoneRule = z.string().regex(PHONE_REGEX, PHONE_MSG);
+export const optionalPhoneRule = z
+  .string()
+  .optional()
+  .refine((v) => !v || PHONE_REGEX.test(v), { message: PHONE_MSG });
+
+// UTR / UPI reference — 6-30 alphanumeric. Matches backend regex.
+export const utrRule = z
+  .string()
+  .regex(/^[A-Za-z0-9]{6,30}$/, 'Enter a valid UTR (6-30 letters/digits)');
+
 export const loginSchema = z.object({
   email: z.string().email('Invalid email'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
@@ -10,13 +25,13 @@ export const signupSchema = z.object({
   gymName: z.string().min(2, 'Gym name is required'),
   email: z.string().email('Invalid email'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
-  phone: z.string().optional(),
+  phone: phoneRule,
 });
 
 export const memberSchema = z.object({
   name: z.string().min(2, 'Name is required'),
   email: z.string().email('Invalid email').optional().or(z.literal('')),
-  phone: z.string().min(7, 'Phone is required'),
+  phone: phoneRule,
   gender: z.enum(['male', 'female', 'other']).default('male'),
   joinDate: z.string().optional(),
   expiryDate: z.string().min(1, 'Expiry date is required'),
@@ -29,7 +44,7 @@ export const memberSchema = z.object({
 export const trainerSchema = z.object({
   name: z.string().min(2, 'Name is required'),
   email: z.string().email('Invalid email').optional().or(z.literal('')),
-  phone: z.string().min(7, 'Phone is required'),
+  phone: phoneRule,
   gender: z.enum(['male', 'female', 'other']).default('male'),
   specialization: z.string().optional(),
   experience: z.coerce.number().min(0).default(0),
@@ -60,7 +75,7 @@ export const paymentSchema = z.object({
 export const profileSchema = z.object({
   name: z.string().min(2, 'Name is required'),
   email: z.string().email('Invalid email'),
-  phone: z.string().optional(),
+  phone: optionalPhoneRule,
   gymName: z.string().min(2, 'Gym name is required'),
 });
 

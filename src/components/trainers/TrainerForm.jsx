@@ -1,6 +1,7 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { trainerSchema } from '@/utils/validators';
+import { applyServerError } from '@/lib/formErrors';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -10,6 +11,7 @@ export function TrainerForm({ defaultValues, onSubmit, submitting }) {
   const {
     register,
     handleSubmit,
+    setError,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(trainerSchema),
@@ -26,8 +28,17 @@ export function TrainerForm({ defaultValues, onSubmit, submitting }) {
     },
   });
 
+  // Catch server-side 409 (duplicate email) and pin it next to the email field.
+  const handleFormSubmit = async (values) => {
+    try {
+      await onSubmit(values);
+    } catch (err) {
+      applyServerError(err, setError, 'email');
+    }
+  };
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <Label>Name *</Label>
@@ -36,12 +47,19 @@ export function TrainerForm({ defaultValues, onSubmit, submitting }) {
         </div>
         <div>
           <Label>Phone *</Label>
-          <Input {...register('phone')} />
+          <Input
+            type="tel"
+            inputMode="numeric"
+            maxLength={10}
+            placeholder="10-digit mobile"
+            {...register('phone')}
+          />
           {errors.phone && <p className="text-xs text-destructive mt-1">{errors.phone.message}</p>}
         </div>
         <div>
           <Label>Email</Label>
           <Input type="email" {...register('email')} />
+          {errors.email && <p className="text-xs text-destructive mt-1">{errors.email.message}</p>}
         </div>
         <div>
           <Label>Gender</Label>

@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { Dumbbell } from 'lucide-react';
 
 import { signupSchema } from '@/utils/validators';
+import { applyServerError } from '@/lib/formErrors';
 import { authService } from '@/services/authService';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
@@ -21,6 +22,7 @@ export default function Signup() {
   const {
     register,
     handleSubmit,
+    setError,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(signupSchema),
@@ -35,7 +37,9 @@ export default function Signup() {
       toast.success('Account created');
       navigate('/dashboard');
     } catch (err) {
-      toast.error(err?.response?.data?.message || 'Signup failed');
+      if (!applyServerError(err, setError, 'email')) {
+        toast.error(err?.response?.data?.message || 'Signup failed');
+      }
     } finally {
       setLoading(false);
     }
@@ -71,7 +75,14 @@ export default function Signup() {
             </div>
             <div>
               <Label>Phone</Label>
-              <Input {...register('phone')} />
+              <Input
+                type="tel"
+                inputMode="numeric"
+                maxLength={10}
+                placeholder="10-digit mobile"
+                {...register('phone')}
+              />
+              {errors.phone && <p className="text-xs text-destructive mt-1">{errors.phone.message}</p>}
             </div>
             <div>
               <Label>Password</Label>
