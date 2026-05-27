@@ -8,21 +8,21 @@ import { setSidebarOpen } from '../../store/slices/uiSlice';
 import { useAuth } from '../../hooks/useAuth';
 import { cn } from '@/lib/utils';
 
-// Sidebar items grouped roughly by frequency-of-use.
-// `disabled: true` items render greyed-out so the user can see the roadmap but can't navigate
-// to half-finished pages while we build them out module by module.
+// Sidebar order chosen by the user: operational flow at the top (Lead → Quotation → Order →
+// PI → PO → Dispatch → Invoices), then the master data (Products / Customers / Suppliers) at
+// the bottom since those are touched less often once seeded. Reports last.
 const NAV = [
   { to: '/dashboard',         label: 'Dashboard',          icon: LayoutDashboard },
   { to: '/leads',             label: 'Leads',              icon: UserPlus,          disabled: true },
   { to: '/quotations',        label: 'Quotations',         icon: FileText,          disabled: true },
   { to: '/orders',            label: 'Orders',             icon: ShoppingCart,      disabled: true },
-  { to: '/dispatch',          label: 'Dispatch',           icon: Truck,             disabled: true },
-  { to: '/customers',         label: 'Customers',          icon: Users,             disabled: true },
-  { to: '/suppliers',         label: 'Suppliers',          icon: Building2,         disabled: true },
-  { to: '/products',          label: 'Products',           icon: Package,           disabled: true },
-  { to: '/purchase-orders',   label: 'Purchase Orders',    icon: FilePlus,          disabled: true },
   { to: '/proforma-invoices', label: 'Proforma Invoices',  icon: FileSpreadsheet,   disabled: true },
+  { to: '/purchase-orders',   label: 'Purchase Orders',    icon: FilePlus,          disabled: true },
+  { to: '/dispatch',          label: 'Dispatch',           icon: Truck,             disabled: true },
   { to: '/invoices',          label: 'Invoices',           icon: Receipt,           disabled: true },
+  { to: '/products',          label: 'Products',           icon: Package },
+  { to: '/customers',         label: 'Customers',          icon: Users },
+  { to: '/suppliers',         label: 'Suppliers',          icon: Building2 },
   { to: '/reports',           label: 'Reports',            icon: BarChart3,         disabled: true },
 ];
 

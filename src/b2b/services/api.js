@@ -29,6 +29,13 @@ api.interceptors.response.use(
         toast.error('Session expired, please log in again');
         window.location.href = '/login';
       }
+    } else if (status === 402) {
+      // Trial / subscription expired. Phase 1+ shows a toast; a proper subscribe dialog
+      // (like the gym side) will land in a later phase.
+      toast.error(message || 'Trial expired — please subscribe to continue.', {
+        id: 'sub-expired',
+        duration: 6000,
+      });
     } else if (status === 429) {
       const code = error?.response?.data?.code;
       toast.error(message, {
