@@ -29,6 +29,14 @@ api.interceptors.response.use(
       }
     } else if (status === 402) {
       store.dispatch(setSubscriptionDialogOpen(true));
+    } else if (status === 429) {
+      // Progressive block from the backend. Show the server's specific message ("blocked for N
+      // minutes" / "permanently blocked") rather than a generic toast.
+      const code = error?.response?.data?.code;
+      toast.error(message, {
+        duration: code === 'BLOCKED_PERMANENT' ? 10000 : 6000,
+        id: 'blocked', // de-dupe so a burst of requests doesn't spam the toast stack
+      });
     } else if (status >= 500) {
       toast.error(message);
     }
