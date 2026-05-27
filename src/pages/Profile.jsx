@@ -2,7 +2,10 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
-import { Moon, Sun } from 'lucide-react';
+import { Moon, Sun, CreditCard, ArrowRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Badge } from '@/components/ui/badge';
+import { formatDate } from '@/lib/utils';
 
 import { profileSchema, passwordSchema } from '@/utils/validators';
 import { profileService } from '@/services/profileService';
@@ -183,6 +186,34 @@ function AppearanceCard() {
   );
 }
 
+function SubscriptionCard() {
+  const { user } = useAuth();
+  const state = user?.subscriptionState || 'expired';
+  const meta = {
+    trial:   { label: 'Free trial', variant: 'warning', desc: `Free trial ends ${user?.trialEndsAt ? formatDate(user.trialEndsAt) : ''}` },
+    active:  { label: 'Active',     variant: 'success', desc: `Subscription active till ${user?.subscriptionEndsAt ? formatDate(user.subscriptionEndsAt) : ''}` },
+    expired: { label: 'Expired',    variant: 'destructive', desc: 'Your trial / subscription has expired.' },
+  }[state];
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2"><CreditCard className="h-5 w-5" /> Subscription</CardTitle>
+        <CardDescription>Manage your panel subscription and renewals.</CardDescription>
+      </CardHeader>
+      <CardContent className="flex flex-wrap items-center gap-4">
+        <Badge variant={meta.variant} className="text-sm">{meta.label}</Badge>
+        <span className="text-sm text-muted-foreground flex-1 min-w-0">{meta.desc}</span>
+        <Button asChild>
+          <Link to="/subscribe">
+            Manage subscription <ArrowRight className="h-4 w-4 ml-1" />
+          </Link>
+        </Button>
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function Profile() {
   return (
     <div className="space-y-6">
@@ -191,6 +222,7 @@ export default function Profile() {
         <p className="text-sm text-muted-foreground">Manage your account.</p>
       </div>
       <ProfileCard />
+      <SubscriptionCard />
       <AppearanceCard />
       <PasswordCard />
     </div>

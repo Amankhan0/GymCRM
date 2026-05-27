@@ -32,7 +32,8 @@ export default function Dashboard() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+      {/* 3 cards per row at desktop — gives more visual breathing room than the old 6-up grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <StatCard title="Total Members" value={stats.totalMembers} icon={Users} tone="indigo" />
 
         {/* Pending fees in red so it visually pops as the most urgent metric */}
