@@ -1,7 +1,19 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { ShieldCheck } from 'lucide-react';
+
+// Inject a noindex meta tag so search engines don't index the super-admin login page even if
+// the Vercel route header somehow misses (SPA route is internally served as /index.html).
+const useNoIndex = () => {
+  useEffect(() => {
+    const meta = document.createElement('meta');
+    meta.name = 'robots';
+    meta.content = 'noindex, nofollow';
+    document.head.appendChild(meta);
+    return () => { document.head.removeChild(meta); };
+  }, []);
+};
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,6 +22,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { superadminService } from '@/services/superadminService';
 
 export default function SuperLogin() {
+  useNoIndex();
   const navigate = useNavigate();
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);

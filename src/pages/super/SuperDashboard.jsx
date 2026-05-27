@@ -40,7 +40,16 @@ export default function SuperDashboard() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // If the stored password is wrong/missing, bounce to login.
+  // Belt-and-braces noindex meta in addition to the Vercel response header for /super/*.
+  useEffect(() => {
+    const meta = document.createElement('meta');
+    meta.name = 'robots';
+    meta.content = 'noindex, nofollow';
+    document.head.appendChild(meta);
+    return () => { document.head.removeChild(meta); };
+  }, []);
+
+  // If the stored token is missing/expired, bounce to login.
   useEffect(() => {
     if (!superadminService.isAuthed()) {
       navigate('/super');
