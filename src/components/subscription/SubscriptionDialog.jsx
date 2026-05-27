@@ -41,12 +41,15 @@ export function SubscriptionDialog() {
   const close = () => dispatch(setSubscriptionDialogOpen(false));
 
   const isExpired = status?.state === 'expired';
+  // While status is still loading we don't yet know if the user is expired — treat as locked
+  // so the X / overlay / Esc don't flash a dismissable state for a split second.
+  const lockClose = !status || isExpired;
 
   // When the user is expired the dialog must not be dismissable — closing would strand them on a
   // page that already failed its API calls (the 402 broke them out of useEffect with no data).
   // The only escape is "Subscribe" or "Logout".
   const handleOpenChange = (next) => {
-    if (!next && isExpired) return;
+    if (!next && lockClose) return;
     dispatch(setSubscriptionDialogOpen(next));
   };
 
@@ -122,9 +125,9 @@ export function SubscriptionDialog() {
       <DialogContent
         className="max-w-md"
         hideClose
-        // Block outside-click and Esc from dismissing when expired (matches handleOpenChange)
-        onInteractOutside={(e) => { if (isExpired) e.preventDefault(); }}
-        onEscapeKeyDown={(e) => { if (isExpired) e.preventDefault(); }}
+        // Block outside-click and Esc from dismissing while locked (loading or expired)
+        onInteractOutside={(e) => { if (lockClose) e.preventDefault(); }}
+        onEscapeKeyDown={(e) => { if (lockClose) e.preventDefault(); }}
       >
         <DialogHeader>
           <div className="flex items-start justify-between gap-2">
@@ -134,8 +137,8 @@ export function SubscriptionDialog() {
               </DialogTitle>
               <DialogDescription>Scan the QR, pay, then submit the UTR.</DialogDescription>
             </div>
-            {/* Active/trial users can close at will; expired users cannot (must subscribe or logout) */}
-            {!isExpired && (
+            {/* Active/trial users can close at will; expired (or still loading) users cannot */}
+            {!lockClose && (
               <button
                 type="button"
                 onClick={close}
