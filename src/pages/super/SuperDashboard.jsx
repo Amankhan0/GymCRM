@@ -32,6 +32,17 @@ import { formatCurrency, formatDate } from '@/lib/utils';
 
 const requestVariant = { pending: 'warning', approved: 'success', rejected: 'destructive' };
 
+// Which product (website) a user / payment belongs to.
+const productMeta = {
+  gym: { label: 'Gym', cls: 'bg-blue-100 text-blue-700 dark:bg-blue-500/15 dark:text-blue-300' },
+  b2b: { label: 'B2B', cls: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300' },
+  ai: { label: 'AI', cls: 'bg-purple-100 text-purple-700 dark:bg-purple-500/15 dark:text-purple-300' },
+};
+function ProductBadge({ product }) {
+  const m = productMeta[product] || { label: product || '—', cls: 'bg-muted text-muted-foreground' };
+  return <span className={`inline-block rounded px-2 py-0.5 text-xs font-semibold ${m.cls}`}>{m.label}</span>;
+}
+
 export default function SuperDashboard() {
   const navigate = useNavigate();
   const [stats, setStats] = useState(null);
@@ -183,9 +194,9 @@ export default function SuperDashboard() {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Name</TableHead>
-                      <TableHead>Gym</TableHead>
+                      <TableHead>Product</TableHead>
+                      <TableHead>Gym / Credits</TableHead>
                       <TableHead>Email</TableHead>
-                      <TableHead>Trial ends</TableHead>
                       <TableHead>Sub ends</TableHead>
                       <TableHead>State</TableHead>
                     </TableRow>
@@ -194,9 +205,11 @@ export default function SuperDashboard() {
                     {users.map((u) => (
                       <TableRow key={u._id}>
                         <TableCell className="font-medium">{u.name}</TableCell>
-                        <TableCell>{u.gymName}</TableCell>
+                        <TableCell><ProductBadge product={u.product} /></TableCell>
+                        <TableCell className="text-xs">
+                          {u.product === 'ai' ? `${u.credits ?? 0} credits` : u.gymName || '-'}
+                        </TableCell>
                         <TableCell className="text-xs">{u.email}</TableCell>
-                        <TableCell>{u.trialEndsAt ? formatDate(u.trialEndsAt) : '-'}</TableCell>
                         <TableCell>{u.subscriptionEndsAt ? formatDate(u.subscriptionEndsAt) : '-'}</TableCell>
                         <TableCell>
                           <Badge variant={
@@ -216,7 +229,8 @@ export default function SuperDashboard() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Submitted</TableHead>
-                    <TableHead>User / Gym</TableHead>
+                    <TableHead>Product</TableHead>
+                    <TableHead>User</TableHead>
                     <TableHead>Plan</TableHead>
                     <TableHead>Amount</TableHead>
                     <TableHead>UTR</TableHead>
@@ -229,9 +243,10 @@ export default function SuperDashboard() {
                   {requests.map((r) => (
                     <TableRow key={r._id}>
                       <TableCell className="text-xs">{formatDate(r.createdAt)}</TableCell>
+                      <TableCell><ProductBadge product={r.product} /></TableCell>
                       <TableCell>
-                        <div className="font-medium">{r.user?.gymName || '-'}</div>
-                        <div className="text-xs text-muted-foreground">{r.user?.name} · {r.user?.email}</div>
+                        <div className="font-medium">{r.user?.gymName || r.user?.name || '-'}</div>
+                        <div className="text-xs text-muted-foreground">{r.user?.email}</div>
                       </TableCell>
                       <TableCell className="capitalize">{r.planKey}</TableCell>
                       <TableCell>{formatCurrency(r.amount)}</TableCell>
