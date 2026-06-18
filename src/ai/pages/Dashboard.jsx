@@ -56,7 +56,7 @@ export default function Dashboard() {
       const blob = await (await fetch(result.url)).blob();
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
-      a.download = `aether-${Date.now()}.png`;
+      a.download = `nyra-${Date.now()}.png`;
       a.click();
       URL.revokeObjectURL(a.href);
     } catch {
@@ -75,7 +75,7 @@ export default function Dashboard() {
         <h1 className="font-display text-2xl font-bold text-white sm:text-3xl">
           Create with <span className="ae-gradient-text">AI</span>
         </h1>
-        <p className="text-sm text-white/45">Describe anything. Aether brings it to life.</p>
+        <p className="text-sm text-white/45">Describe anything. Nyra brings it to life.</p>
       </div>
 
       {/* Tabs */}

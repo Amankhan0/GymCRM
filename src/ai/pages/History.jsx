@@ -37,7 +37,7 @@ export default function History() {
       const blob = await (await fetch(url)).blob();
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
-      a.download = `aether-${Date.now()}.png`;
+      a.download = `nyra-${Date.now()}.png`;
       a.click();
       URL.revokeObjectURL(a.href);
     } catch {
@@ -49,7 +49,7 @@ export default function History() {
     <div>
       <div className="mb-6">
         <h1 className="font-display text-2xl font-bold text-white sm:text-3xl">History</h1>
-        <p className="text-sm text-white/45">Everything you've created with Aether.</p>
+        <p className="text-sm text-white/45">Everything you've created with Nyra.</p>
       </div>
 
       {loading ? (

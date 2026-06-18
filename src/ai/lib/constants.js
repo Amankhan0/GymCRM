@@ -1,4 +1,4 @@
-export const BRAND = 'Aether';
+export const BRAND = 'Nyra';
 
 export const ASPECT_RATIOS = [
   { id: '1:1', label: '1:1', hint: 'Square', box: 'h-6 w-6' },

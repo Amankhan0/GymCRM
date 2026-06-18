@@ -17,7 +17,7 @@ const GOOGLE_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
 
 export default function App() {
   useEffect(() => {
-    document.title = 'Aether — AI Image & Video Studio';
+    document.title = 'Nyra — AI Image & Video Studio';
   }, []);
 
   const tree = (

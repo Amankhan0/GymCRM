@@ -36,7 +36,7 @@ const FEATURES = [
 ];
 
 const TESTIMONIALS = [
-  { name: 'Aarav Mehta', role: 'Brand Designer', text: 'Aether replaced three tools in my stack. The image quality is genuinely unreal.' },
+  { name: 'Aarav Mehta', role: 'Brand Designer', text: 'Nyra replaced three tools in my stack. The image quality is genuinely unreal.' },
   { name: 'Priya Nair', role: 'Content Creator', text: 'I shipped a whole campaign in an afternoon. The presets nail the aesthetic every time.' },
   { name: 'Rohan Das', role: 'Startup Founder', text: 'Clean, fast, and premium. It feels like the future of creative work.' },
 ];
