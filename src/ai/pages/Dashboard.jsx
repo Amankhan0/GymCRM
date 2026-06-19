@@ -7,7 +7,7 @@ import { ImageIcon, Video, Sparkles, Loader2, Download, Wand2, Clapperboard } fr
 import { genApi } from '../services/aiService';
 import { setCredits } from '../store/slices/authSlice';
 import {
-  ASPECT_RATIOS, STYLES, QUALITIES, VIDEO_DURATIONS, VIDEO_FORMATS, VIDEO_RESOLUTIONS,
+  MODELS, ASPECT_RATIOS, STYLES, QUALITIES, VIDEO_DURATIONS, VIDEO_FORMATS, VIDEO_RESOLUTIONS,
 } from '../lib/constants';
 
 export default function Dashboard() {
@@ -16,7 +16,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(false);
   const [imgLoaded, setImgLoaded] = useState(false);
   const [result, setResult] = useState(null); // { url } for image
-  const [img, setImg] = useState({ aspectRatio: '1:1', style: 'none', quality: 'standard' });
+  const [img, setImg] = useState({ model: 'flux', aspectRatio: '1:1', style: 'none', quality: 'standard' });
   const [vid, setVid] = useState({ duration: '5', format: 'horizontal', resolution: '720p' });
 
   const user = useSelector((s) => s.auth.user);
@@ -160,6 +160,19 @@ export default function Dashboard() {
           <h3 className="text-sm font-semibold text-white/80">Options</h3>
           {tab === 'image' ? (
             <>
+              <OptionRow label="Model">
+                {MODELS.map((m) => (
+                  <button
+                    key={m.id}
+                    onClick={() => setImg((p) => ({ ...p, model: m.id }))}
+                    title={m.desc}
+                    className={`ae-chip flex items-center gap-1.5 ${img.model === m.id ? 'ae-chip-on' : 'ae-chip-off'}`}
+                  >
+                    {m.label}
+                    {m.premium && <span className="rounded bg-brand/20 px-1 text-[9px] font-bold text-brand-soft">PRO</span>}
+                  </button>
+                ))}
+              </OptionRow>
               <OptionRow label="Aspect ratio">
                 {ASPECT_RATIOS.map((a) => (
                   <button key={a.id} onClick={() => setImg((s) => ({ ...s, aspectRatio: a.id }))} className={`ae-chip flex items-center gap-2 ${img.aspectRatio === a.id ? 'ae-chip-on' : 'ae-chip-off'}`}>

@@ -6,6 +6,14 @@ export const ASPECT_RATIOS = [
   { id: '9:16', label: '9:16', hint: 'Portrait', box: 'h-6 w-[14px]' },
 ];
 
+// Selectable image models. Real & distinct on the paid Fal.ai tier; free tier serves a base model.
+export const MODELS = [
+  { id: 'flux', label: 'Flux', desc: 'Best all-round' },
+  { id: 'turbo', label: 'Turbo', desc: 'Fastest' },
+  { id: 'flux-pro', label: 'Flux Pro', desc: 'Premium', premium: true },
+  { id: 'sdxl', label: 'SDXL', desc: 'Classic' },
+];
+
 export const STYLES = [
   { id: 'none', label: 'Auto' },
   { id: 'cinematic', label: 'Cinematic' },
